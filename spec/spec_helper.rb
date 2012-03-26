@@ -1,6 +1,6 @@
 require 'rubygems' unless defined?(Gem)
 require 'bundler/setup'
-require 'mini_record'
+require 'active_record_inline_schema'
 require 'minitest/autorun'
 
 # require 'logger'

@@ -1,5 +1,5 @@
 require 'zlib'
-module MiniRecord
+module ActiveRecordInlineSchema
   module AutoSchema
     def self.included(base)
       base.extend(ClassMethods)
@@ -226,4 +226,4 @@ module MiniRecord
       end
     end # ClassMethods
   end # AutoSchema
-end # MiniRecord
+end # ActiveRecordInlineSchema

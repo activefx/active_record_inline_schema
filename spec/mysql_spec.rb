@@ -3,7 +3,7 @@ require File.expand_path('../spec_helper.rb', __FILE__)
 bin = ENV['TEST_MYSQL_BIN'] || 'mysql'
 username = ENV['TEST_MYSQL_USERNAME'] || 'root'
 password = ENV['TEST_MYSQL_PASSWORD'] || 'password'
-database = ENV['TEST_MYSQL_DATABASE'] || 'test_mini_record'
+database = ENV['TEST_MYSQL_DATABASE'] || 'test_active_record_inline_schema'
 cmd = "#{bin} -u #{username} -p#{password}"
 
 `#{cmd} -e 'show databases'`

@@ -4,7 +4,7 @@ createdb_bin = ENV['TEST_CREATEDB_BIN'] || 'createdb'
 dropdb_bin = ENV['TEST_DROPDB_BIN'] || 'dropdb'
 username = ENV['TEST_POSTGRES_USERNAME'] || `whoami`.chomp
 # password = ENV['TEST_POSTGRES_PASSWORD'] || 'password'
-database = ENV['TEST_POSTGRES_DATABASE'] || 'test_mini_record'
+database = ENV['TEST_POSTGRES_DATABASE'] || 'test_active_record_inline_schema'
 
 system %{#{dropdb_bin} #{database}}
 system %{#{createdb_bin} #{database}}

@@ -1,156 +1,56 @@
-[![Build Status](https://secure.travis-ci.org/DAddYE/mini_record.png)](http://travis-ci.org/DAddYE/mini_record)
+# ActiveRecordInlineSchema
 
+Define table structure (columns and indexes) inside your ActiveRecord models like you can do in migrations. Also similar to DataMapper inline schema syntax.
 
-MiniRecord is a micro extension for our `ActiveRecord` gem.
-With MiniRecord you can add the ability to create columns outside the default `schema.rb`, directly
-in your **model** in a similar way that should know in others projects
-like  DataMapper, MongoMapper or MongoID.
+Specify columns like you would with ActiveRecord migrations and then run .auto_upgrade! Based on the mini_record gem from Davide D'Agostino, it adds fewer aliases, doesn't create timestamps and relationship columns automatically.
 
-My inspiration come from this handy [project](https://github.com/pjhyett/auto_migrations).
+## Production use
 
-## Features
+Over 2 years in [Brighter Planet's environmental impact API](http://impact.brighterplanet.com) and [reference data service](http://data.brighterplanet.com).
 
-* Define columns/properties inside your model
-* Perform migrations automatically
-* Auto upgrade your schema, so if you know what you are doing you don't lost your existing data!
-* Add, Remove, Change Columns; Add, Remove, Change indexes
-
-## Instructions
-
-What you need is to move/remove your `db/schema.rb`.
-This avoid conflicts.
-
-Add to your `Gemfile`:
-
-``` rb
-gem 'mini_record'
-```
-
-That's all!
+Lots and lots of use in the [`earth` library](https://github.com/brighterplanet/earth).
 
 ## Examples
 
-Remember that inside properties you can use all migrations methods,
-see [documentation](http://api.rubyonrails.org/classes/ActiveRecord/Migration.html)
+    class Breed < ActiveRecord::Base
+      col :species_name
+      col :weight, :type => :float
+      col :weight_units
+    end
+    Breed.auto_upgrade!
 
-``` rb
-class Post < ActiveRecord::Base
-  col :title_en, :title_jp
-  col :description_en, :description_jp, :as => :text
-  col :permalink, :index => true, :limit => 50
-  col :comments_count, :as => :integer
-  col :category, :as => :references, :index => true
-end
-Post.auto_upgrade!
-```
+    class Airport < ActiveRecord::Base
+      self.primary_key = "iata_code"
+      belongs_to :country, :foreign_key => 'country_iso_3166_code', :primary_key => 'iso_3166_code'
+      col :iata_code
+      col :name
+      col :city
+      col :country_name
+      col :country_iso_3166_code
+      col :latitude, :type => :float
+      col :longitude, :type => :float
+    end
+    Airport.auto_upgrade!
 
-Instead of `:as => :my_type` you can use `:type => :my_type`
+    class ApiResponse < ActiveRecord::Base
+      col :raw_body, :type => 'varbinary(16384)'
+    end
+    ApiResponse.auto_upgrade!
 
-Option `:as` or `:type` if not provided is `:string` by default, you can use all ActiveRecord types:
+## Credits
 
-``` rb
-:primary_key, :string, :text, :integer, :float, :decimal, :datetime, :timestamp, :time, :date, :binary, :boolean
-:references, :belongs_to, :polymorphic, :timestamp
-```
-
-You can provide others ActiveRecord options like:
-
-``` rb
-:limit, :default, :null, :precision, :scale
-
-# example
-class Foo < ActiveRecord::Base
-  col :title, :default => "MyTitle" # :as => :string is by default
-  col :price, :as => :decimal, :scale => 8, :precision => 2
-end
-```
-
-See [ActiveRecord::TableDefinition](http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html) 
-for more details.
-
-Finally, when you execute `MyModel.auto_upgrade!`, missing columns, indexes and tables will be created on the fly.
-Indexes and columns present in the db but **not** in your model schema will be **deleted*** also in your db.
-
-### Single Table Inheritance
-
-MiniRecord as ActiveRecord support STI plus some goodness, see our specs for more details.
-
-### Adding a new column
-
-Super easy, open your model and just add it:
-
-``` rb
-class Post < ActiveRecord::Base
-  col :title
-  col :body, :as => :text # <<- this
-  col :permalink, :index => true
-  col :comments_count, :as => :integer
-  col :category, :as => :references, :index => true
-end
-Post.auto_upgrade!
-```
-
-So now when you invoke `MyModel.auto_upgrade!` you should see a SQL query like `ALTER TABLE` that mean that your existing
-records are happy and safe.
-
-### Removing a column
-
-It's exactly the same, but the column will be _really_ deleted without affect other columns.
-
-### Change columns
-
-It's not possible for us know when/what column you have renamed, but we can know if you changed the `type` so
-if you change `t.string :name` to `t.text :name` we are be able to perform an `ALTER TABLE`
-
-### Add/Remove indexes
-
-In the same ways we manage columns MiniRecord will detect new indexes and indexes that needs to be removed.
-So when you perform `MyModel.auto_upgrade!` a SQL command like:
-
-``` SQL
-PRAGMA index_info('index_people_on_name')
-CREATE INDEX "index_people_on_surname" ON "people" ("surname")
-```
-
-Note that writing it in DSL way you have same options as `add_index` so you are be able to write:
-
-``` rb
-class Fox < ActiveRecord::Base
-  col :foo, :index => true
-  col :foo, :index => :custom_name
-  col :foo, :index => [:foo, :bar]
-  col :foo, :index => { :column => [:branch_id, :party_id], :unique => true, :name => 'by_branch_party' }
-end
-```
-
-That is the same of:
-
-``` rb
-class Fox < ActiveRecord::Base
-  col :foo
-  add_index :foo
-  add_index :custom_name
-  add_index [:foo, :bar]
-  add_index [:branch_id, :party_id], :unique => true, :name => 'by_branch_party'
-end
-```
-
-## Warnings
-
-This software is not super well tested in a production project.
-Im stated to using it in two customer's projects without any problem.
+Massive thanks to DAddYE, who you follow on twitter [@daddye](http://twitter.com/daddye) and look at his site at [daddye.it](http://www.daddye.it)
 
 ## TODO
 
-* reduce the number of methods we add to ActiveRecord::Base objects
-
-## Author
-
-DAddYE, you can follow me on twitter [@daddye](http://twitter.com/daddye) or take a look at my site [daddye.it](http://www.daddye.it)
+* merge back into mini_record? they make some choices (automatically creating relationships, mixing in lots of aliases, etc.) that I don't need
+* make the documentation as good as mini_record
 
 ## Copyright
 
-Copyright (C) 2011 Davide D'Agostino - [@daddye](http://twitter.com/daddye)
+Copyright 2012 Seamus Abshere
+
+Adapted from [mini_record](https://github.com/DAddYE/mini_record), which is copyright 2011 Davide D'Agostino
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the “Software”), to deal in the Software without restriction, including without
