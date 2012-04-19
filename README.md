@@ -33,6 +33,9 @@ Lots and lots of use in the [`earth` library](https://github.com/brighterplanet/
     Airport.auto_upgrade!
 
     class ApiResponse < ActiveRecord::Base
+      # store with:    self.body = Zlib::Deflate.deflate(body, Zlib::BEST_SPEED)
+      # retrieve with: Zlib::Inflate.inflate(raw_body).force_encoding 'UTF-8'
+      # just an idea!
       col :raw_body, :type => 'varbinary(16384)'
     end
     ApiResponse.auto_upgrade!
@@ -43,41 +46,12 @@ Massive thanks to DAddYE, who you follow on twitter [@daddye](http://twitter.com
 
 ## TODO
 
-* merge back into mini_record? they make some choices (automatically creating relationships, mixing in lots of aliases, etc.) that I don't need
 * make the documentation as good as mini_record
+* investigate switching back to ActiveRecord::ConnectionAdapters::TableDefinition as a way of holding column and index info
 
 ## History
 
-Forked from [`mini_record` version v0.2.1](https://github.com/DAddYE/mini_record) - thanks @daddye! Here's a rough outline of the differences:
-
-### Difference between mini_record v0.2.1 and active_record_inline_schema v0.4.0
-
-Having diverged at [this commit](https://github.com/DAddYE/mini_record/commit/55b2545f9772f7500d3782ac530b3da456f50023), I did stuff like...
-
-* didn't set primary key on table definition
-* allow custom column types
-* removed aliases
-* shorten name with zlib trick
-* allow passing create_table_options
-* default to ENGINE=InnoDB on mysql
-* detect and create table for non-standard primary key
-* move where schema inheritance columns are defined
-* removed table_definition accessor
-* allow custom column types like `varbinary`
-* more compatible with ActiveRecord 3.0 and 3.2.2
-
-### Difference between mini_record v0.2.1 and mini_record v0.3.0
-
-After I made this list, I decided to diverge from mini_record instead of doing a pull request:
-
-* allow custom column types
-* add timestamps
-* remove unused (unmentioned) tables
-* call auto_upgrade on descendant tables
-* automagically generate fields from associations
-* revised difference checking code
-
-Pity the forker (me)!
+Forked from [`mini_record` version v0.2.1](https://github.com/DAddYE/mini_record) - thanks @daddye! See CHANGELOG for a rough outline of the differences.
 
 ## Copyright
 

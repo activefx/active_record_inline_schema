@@ -1,0 +1,53 @@
+## 0.5.0 / 2012-04-19
+
+* Known issues
+
+  * Custom inheritance columns will be ignored unless you have activerecord >3.2.3 (unreleased as of this writing). The bug is https://github.com/rails/rails/pull/5327
+
+* Breaking changes
+
+  * the block form (schema {}) is removed
+  * .col only accepts one column at a time
+  * .col no longer accepts :as => :references
+      was: col :group, :as => :references
+      now: col :group_id, :type => :integer
+  * .col no longer accepts :index => true
+      was: col :foo, :index => true
+      now: col :foo and then add_index :foo
+  * A whole bunch of class methods are no longer mixed into ActiveRecord::Base (see Enhancements below)
+
+* Enhancements
+
+  * Database connection no longer needs to be established before you define columns/indexes (but of course you have to connect before you auto_upgrade!)
+  * Only adds four (4) class methods to ActiveRecord::Base: .auto_upgrade!, .col, .add_index, and .inline_schema_config
+  * Tested on MRI 1.8, MRI 1.9, and JRuby 1.6.7+ across mysql, postgresql, and sqlite3
+  * Simply and DRY via a big refactor
+
+## Difference between mini_record v0.2.1 and active_record_inline_schema v0.4.0
+
+Having diverged at [this commit](https://github.com/DAddYE/mini_record/commit/55b2545f9772f7500d3782ac530b3da456f50023), I did stuff like...
+
+* didn't set primary key on table definition
+* allow custom column types
+* removed aliases
+* shorten name with zlib trick
+* allow passing create_table_options
+* default to ENGINE=InnoDB on mysql
+* detect and create table for non-standard primary key
+* move where schema inheritance columns are defined
+* removed table_definition accessor
+* allow custom column types like `varbinary`
+* more compatible with ActiveRecord 3.0 and 3.2.2
+
+## Difference between mini_record v0.2.1 and mini_record v0.3.0 (which I didn't fork)
+
+After I made this list, I decided to diverge from mini_record v0.2.1 instead of doing a pull request:
+
+* allow custom column types
+* add timestamps
+* remove unused (unmentioned) tables
+* call auto_upgrade on descendant tables
+* automagically generate fields from associations
+* revised difference checking code
+
+Pity the forker (me)!

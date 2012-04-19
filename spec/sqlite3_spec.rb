@@ -5,6 +5,4 @@ ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':me
 # require 'logger'
 # ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new($stdout)
 
-require File.expand_path('../models.rb', __FILE__)
-
 require File.expand_path('../shared_examples.rb', __FILE__)

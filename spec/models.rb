@@ -2,9 +2,7 @@
 
 class Person < ActiveRecord::Base
   include SpecHelper
-  schema do |s|
-    s.string :name
-  end
+  col :name
 end
 
 class Post < ActiveRecord::Base
@@ -12,7 +10,7 @@ class Post < ActiveRecord::Base
 
   col :title
   col :body
-  col :category, :as => :references
+  col :category_id, :type => :integer
   belongs_to :category
 end
 
@@ -26,14 +24,16 @@ end
 class Animal < ActiveRecord::Base
   include SpecHelper
 
-  col :name, :index => true
+  col :name
+  add_index :name
   add_index :id
 end
 
 class Pet < ActiveRecord::Base
   include SpecHelper
 
-  col :name, :index => true
+  col :name
+  add_index :name
 end
 class Dog < Pet; end
 class Cat < Pet; end
@@ -56,8 +56,8 @@ class Gender < ActiveRecord::Base
 end
 
 class User < ActiveRecord::Base
+  self.inheritance_column = 'role'
   include SpecHelper
-  self.inheritance_column = 'role' # messed up in 3.2.2
   col :name
   col :surname
   col :role
@@ -67,8 +67,10 @@ class Customer < User; end
 
 class Fake < ActiveRecord::Base
   include SpecHelper
-  col :name, :surname
-  col :category, :group, :as => :references
+  col :name
+  col :surname
+  col :category_id, :type => :integer
+  col :group_id, :type => :integer
 end
 
 class AutomobileMakeModelYearVariant < ActiveRecord::Base

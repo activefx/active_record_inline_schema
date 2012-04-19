@@ -16,7 +16,7 @@ system %{#{cmd} -e "drop database #{database}"}
 system %{#{cmd} -e "create database #{database}"}
 
 ActiveRecord::Base.establish_connection(
-  'adapter' => 'mysql',
+  'adapter' => (RUBY_PLATFORM == 'java' ? 'mysql' : 'mysql2'),
   'encoding' => 'utf8',
   'database' => database,
   'username' => username,
@@ -26,6 +26,6 @@ ActiveRecord::Base.establish_connection(
 # require 'logger'
 # ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new($stdout)
 
-require File.expand_path('../models.rb', __FILE__)
+# require File.expand_path('../models.rb', __FILE__)
 
 require File.expand_path('../shared_examples.rb', __FILE__)
