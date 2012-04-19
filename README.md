@@ -33,7 +33,7 @@ Lots and lots of use in the [`earth` library](https://github.com/brighterplanet/
     Airport.auto_upgrade!
 
     class ApiResponse < ActiveRecord::Base
-      # store with:    self.body = Zlib::Deflate.deflate(body, Zlib::BEST_SPEED)
+      # store with:    self.raw_body = Zlib::Deflate.deflate(body, Zlib::BEST_SPEED)
       # retrieve with: Zlib::Inflate.inflate(raw_body).force_encoding 'UTF-8'
       # just an idea!
       col :raw_body, :type => 'varbinary(16384)'
