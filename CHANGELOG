@@ -1,3 +1,9 @@
+## 0.5.2 / 2012-04-19
+
+* Bug fixes
+
+  * Fix indexes on multiple columns. Amazing how much damage a single #to_s can do.
+
 ## 0.5.1 / 2012-04-19
 
 * Bug fixes

@@ -11,7 +11,7 @@ class ActiveRecordInlineSchema::Config::Index
 
   def initialize(parent, column_name, options)
     @parent = parent
-    @column_name = column_name.to_s
+    @column_name = column_name
     @initial_options = options.symbolize_keys
     @name_mutex = ::Mutex.new
   end

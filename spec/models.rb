@@ -27,6 +27,7 @@ class Animal < ActiveRecord::Base
   col :name
   add_index :name
   add_index :id
+  add_index [:name, :id]
 end
 
 class Pet < ActiveRecord::Base
