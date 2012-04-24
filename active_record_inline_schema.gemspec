@@ -15,9 +15,10 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_runtime_dependency 'lock_method'
   s.add_runtime_dependency 'activesupport'
   s.add_runtime_dependency "activerecord", ">=3"
+  s.add_runtime_dependency 'lock_method'
+  s.add_runtime_dependency 'cache_method'
   # s.add_runtime_dependency "activerecord", "~>3.0" # must use mysql2 ~>0.2 to test
   # s.add_runtime_dependency "activerecord", "~>3.1"
   # s.add_runtime_dependency "activerecord", "~>3.2"

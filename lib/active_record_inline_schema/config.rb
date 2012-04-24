@@ -1,5 +1,6 @@
 require 'set'
 require 'lock_method'
+require 'cache_method'
 
 class ActiveRecordInlineSchema::Config
   DEFAULT_CREATE_TABLE_OPTIONS = {
@@ -131,19 +132,19 @@ class ActiveRecordInlineSchema::Config
   end
   lock_method :apply, :ttl => 60
 
-  def as_lock
-    if connection.respond_to?(:current_database)
-      [connection.current_database, model.name]
-    else
-      model.name
-    end
-  end
-
   def clear
     @ideal_columns = ::Set.new
     @ideal_indexes = ::Set.new
   end
   lock_method :clear, :ttl => 60
+
+  def as_lock
+    [current_database, model.name]
+  end
+
+  def as_cache_key
+    model.name
+  end
 
   private
 
@@ -194,6 +195,13 @@ class ActiveRecordInlineSchema::Config
     end
     model.connection
   end
+
+  def current_database
+    if connection.respond_to? :current_database
+      connection.current_database
+    end
+  end
+  cache_method :current_database, 60
 
   def database_type
     if mysql?
