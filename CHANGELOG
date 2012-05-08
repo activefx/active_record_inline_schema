@@ -1,22 +1,28 @@
-## 0.5.3 / 2012-04-24
+0.5.4 / 2012-05-08
+
+* Enhancements
+
+  * Slightly better way to get name of current database for locking purposes.
+
+0.5.3 / 2012-04-24
 
 * Enhancements
 
   * Cache name of the current database to speed things up.
 
-## 0.5.2 / 2012-04-19
+0.5.2 / 2012-04-19
 
 * Bug fixes
 
   * Fix indexes on multiple columns. Amazing how much damage a single #to_s can do.
 
-## 0.5.1 / 2012-04-19
+0.5.1 / 2012-04-19
 
 * Bug fixes
 
   * Fix require order... rookie mistake.
 
-## 0.5.0 / 2012-04-19
+0.5.0 / 2012-04-19
 
 * Known issues
 
