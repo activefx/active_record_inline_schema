@@ -1,5 +1,4 @@
 require 'set'
-require 'lock_method'
 
 class ActiveRecordInlineSchema::Config
   DEFAULT_CREATE_TABLE_OPTIONS = {
@@ -129,21 +128,10 @@ class ActiveRecordInlineSchema::Config
 
     safe_reset_column_information
   end
-  lock_method :apply, :ttl => 60
 
   def clear
     @ideal_columns = ::Set.new
     @ideal_indexes = ::Set.new
-  end
-  lock_method :clear, :ttl => 60
-
-  def as_lock
-    database_name = connection.instance_variable_get(:@config).try(:[], :database)
-    [database_name, model.name]
-  end
-
-  def as_cache_key
-    model.name
   end
 
   private
