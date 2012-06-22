@@ -5,6 +5,22 @@ describe ActiveRecordInlineSchema do
     end
   end
 
+  it "properly registers non-incrementing integer primary keys" do
+    Pet2.auto_upgrade!
+    e = if sqlite?
+      ActiveRecord::StatementInvalid
+    else
+      ActiveRecord::RecordNotUnique
+    end
+    lambda do
+      2.times do
+        p = Pet2.new
+        p.id = 1
+        p.save!
+      end
+    end.must_raise(e)
+  end
+
   it 'has #key,col,property,attribute inside model' do
     (!!ActiveRecord::Base.connection.table_exists?(Post.table_name)).must_equal false
     (!!ActiveRecord::Base.connection.table_exists?(Category.table_name)).must_equal false

@@ -1,3 +1,9 @@
+0.5.6 / 2012-06-22
+
+* Enhancements
+
+  * Support non-autoincrementing integer primary keys in MySQL
+
 0.5.5 / 2012-06-20
 
 * Enhancements

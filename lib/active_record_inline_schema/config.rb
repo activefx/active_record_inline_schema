@@ -61,9 +61,8 @@ class ActiveRecordInlineSchema::Config
         end
       elsif mysql?
         if non_standard_primary_key
-          # only string keys are supported
-          create_sql.sub! %r{#{connection.quote_column_name(model.primary_key)} varchar\(255\)([^,\)]*)}, "#{connection.quote_column_name(model.primary_key)} varchar(255)\\1 PRIMARY KEY"
-          create_sql.sub! 'DEFAULT NULLPRIMARY KEY', 'PRIMARY KEY'
+          k = connection.quote_column_name(model.primary_key)
+          create_sql.sub! /#{k} *([^\)]+)(?:[^,]+),/, "#{k} \\1) PRIMARY KEY,"
         end
         connection.execute create_sql
       end

@@ -80,6 +80,13 @@ class AutomobileMakeModelYearVariant < ActiveRecord::Base
   add_index :make_model_year_name
 end
 
+class Pet2 < ActiveRecord::Base
+  include SpecHelper
+  self.primary_key = "id"
+  col :id, :type => :integer
+  col :name
+end
+
 case ENV['DB_ADAPTER']
 when 'mysql'
   class CustomMysql < ActiveRecord::Base
