@@ -87,6 +87,22 @@ class Pet2 < ActiveRecord::Base
   col :name
 end
 
+class Pet3 < ActiveRecord::Base
+  include SpecHelper
+end
+
+class Pet4 < ActiveRecord::Base
+  include SpecHelper
+  self.primary_key = "name"
+  col :name
+end
+
+class Pet5 < ActiveRecord::Base
+  include SpecHelper
+  self.primary_key = "id"
+  col :id, :type => :integer
+end
+
 case ENV['DB_ADAPTER']
 when 'mysql'
   class CustomMysql < ActiveRecord::Base

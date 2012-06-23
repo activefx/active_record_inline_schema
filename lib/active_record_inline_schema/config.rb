@@ -62,7 +62,7 @@ class ActiveRecordInlineSchema::Config
       elsif mysql?
         if non_standard_primary_key
           k = connection.quote_column_name(model.primary_key)
-          create_sql.sub! /#{k} *([^\)]+)(?:[^,]+),/, "#{k} \\1) PRIMARY KEY,"
+          create_sql.sub! /#{k}([^\)]+)\)([^\),]*)/, "#{k}\\1) PRIMARY KEY"
         end
         connection.execute create_sql
       end

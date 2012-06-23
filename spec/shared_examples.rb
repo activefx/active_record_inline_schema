@@ -5,20 +5,41 @@ describe ActiveRecordInlineSchema do
     end
   end
 
-  it "properly registers non-incrementing integer primary keys" do
-    Pet2.auto_upgrade!
-    e = if sqlite?
-      ActiveRecord::StatementInvalid
-    else
-      ActiveRecord::RecordNotUnique
-    end
-    lambda do
-      2.times do
-        p = Pet2.new
-        p.id = 1
-        p.save!
+  describe :regressions do
+    def assert_unique(model, column_name, v)
+      e = if sqlite?
+        ActiveRecord::StatementInvalid
+      else
+        ActiveRecord::RecordNotUnique
       end
-    end.must_raise(e)
+      lambda do
+        2.times do
+          p = model.new
+          p.send "#{column_name}=", v
+          p.save!
+        end
+      end.must_raise(e)
+    end
+
+    it "properly creates tables with only one column, an auto-increment primary key" do
+      Pet3.auto_upgrade!
+      assert_unique Pet3, :id, 1
+    end
+
+    it "properly creates with only one column, a string primary key" do
+      Pet4.auto_upgrade!
+      assert_unique Pet4, :name, 'Jerry'
+    end
+
+    it "properly creates with only one column, a non-auto-increment integer primary key" do
+      Pet5.auto_upgrade!
+      assert_unique Pet5, :id, 1
+    end
+
+    it "properly registers non-incrementing integer primary keys" do
+      Pet2.auto_upgrade!
+      assert_unique Pet2, :id, 1
+    end
   end
 
   it 'has #key,col,property,attribute inside model' do
