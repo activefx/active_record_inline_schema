@@ -13,7 +13,6 @@ class ActiveRecordInlineSchema::Config
     @model = model
     @ideal_columns = ::Set.new
     @ideal_indexes = ::Set.new
-    @connection_mutex = ::Mutex.new
   end
 
   def add_ideal_column(column_name, options)
@@ -121,8 +120,6 @@ class ActiveRecordInlineSchema::Config
     end
 
     safe_reset_column_information
-
-    release_connection
   end
 
   private
@@ -169,24 +166,7 @@ class ActiveRecordInlineSchema::Config
   end
 
   def connection
-    @connection || @connection_mutex.synchronize do
-      @connection ||= begin
-        c = ActiveRecord::Base.connection_pool.checkout
-        unless c.active?
-          raise ::RuntimeError, %{[active_record_inline_schema] Must connect to database before calling #{caller.first}}
-        end
-        c
-      end
-    end
-  end
-
-  def release_connection
-    @connection_mutex.synchronize do
-      if @connection
-        ActiveRecord::Base.connection_pool.checkin @connection
-        @connection = nil
-      end
-    end
+    model.connection
   end
 
   def database_type

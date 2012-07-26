@@ -1,3 +1,9 @@
+0.5.9 / 2012-07-26
+
+* Bug fixes
+
+  * Don't try to use ActiveRecord::Base.checkout with SQLite - it causes "Could not find table" errors
+
 0.5.8 / 2012-07-26
 
 * Breaking changes
