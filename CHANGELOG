@@ -1,3 +1,17 @@
+0.5.8 / 2012-07-26
+
+* Breaking changes
+
+  * No longer automatically adds inheritance columns - you should specify them like "col :type"
+
+* Enhancements
+
+  * A bit more testing of how primary keys work.
+
+* Notes
+
+  * Something is going horribly wrong with SQLite support - lots of "Could not find table" errors. Hoping we can revisit this when sqlite3 gem 1.3.7 comes out.
+
 0.5.7 / 2012-06-22
 
 * Bug fix

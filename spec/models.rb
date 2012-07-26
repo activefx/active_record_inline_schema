@@ -34,6 +34,7 @@ class Pet < ActiveRecord::Base
   include SpecHelper
 
   col :name
+  col :type
   add_index :name
 end
 class Dog < Pet; end
@@ -101,6 +102,11 @@ class Pet5 < ActiveRecord::Base
   include SpecHelper
   self.primary_key = "id"
   col :id, :type => :integer
+end
+
+class Pet6 < ActiveRecord::Base
+  include SpecHelper
+  col :yesno, :type => :boolean
 end
 
 case ENV['DB_ADAPTER']

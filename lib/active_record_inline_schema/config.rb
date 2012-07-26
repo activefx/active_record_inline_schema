@@ -13,6 +13,7 @@ class ActiveRecordInlineSchema::Config
     @model = model
     @ideal_columns = ::Set.new
     @ideal_indexes = ::Set.new
+    @connection_mutex = ::Mutex.new
   end
 
   def add_ideal_column(column_name, options)
@@ -28,50 +29,44 @@ class ActiveRecordInlineSchema::Config
       primary_key_column.type != :primary_key
     end
 
-    unless non_standard_primary_key
+    if non_standard_primary_key
+      if postgresql? or sqlite?
+        primary_key_column.options[:null] = false
+      end
+    else
       add_ideal_column :id, :type => :primary_key
+    end
+
+    table_definition = ActiveRecord::ConnectionAdapters::TableDefinition.new connection
+    ideal_columns.each do |ideal_column|
+      ideal_column.inject table_definition
     end
 
     # Table doesn't exist, create it
     unless connection.table_exists? model.table_name
+      create_table_options ||= DEFAULT_CREATE_TABLE_OPTIONS[database_type]
 
-      if mysql?
-        create_table_options ||= DEFAULT_CREATE_TABLE_OPTIONS[database_type]
+      statements = []
+      statements << "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{create_table_options}"
+
+      if non_standard_primary_key
+        if postgresql?
+          statements << %{ALTER TABLE #{model.quoted_table_name} ADD PRIMARY KEY (#{model.quoted_primary_key})}
+        elsif mysql?
+          k = model.quoted_primary_key
+          statements.first.sub! /#{k}([^\)]+)\)([^\),]*)/, "#{k}\\1) PRIMARY KEY"
+        end
       end
 
-      table_definition = ::ActiveRecord::ConnectionAdapters::TableDefinition.new connection
-      ideal_columns.each do |ideal_column|
-        ideal_column.inject table_definition
-      end
-
-      # avoid using connection.create_table because in 3.0.x it ignores table_definition
-      # and it also is too eager about adding a primary key column
-      create_sql = "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{create_table_options}"
-
-      if sqlite?
-        connection.execute create_sql
-        if non_standard_primary_key
-          add_ideal_index model.primary_key, :unique => true
-        end
-      elsif postgresql?
-        connection.execute create_sql
-        if non_standard_primary_key
-          # can't use add_index method because it won't let you do "PRIMARY KEY"
-          connection.execute "ALTER TABLE #{model.quoted_table_name} ADD PRIMARY KEY (#{model.quoted_primary_key})"
-        end
-      elsif mysql?
-        if non_standard_primary_key
-          k = connection.quote_column_name(model.primary_key)
-          create_sql.sub! /#{k}([^\)]+)\)([^\),]*)/, "#{k}\\1) PRIMARY KEY"
-        end
-        connection.execute create_sql
+      statements.each do |sql|
+        connection.execute sql
       end
       safe_reset_column_information
     end
 
-    # Add to schema inheritance column if necessary
-    if model.descendants.any? and not find_ideal_column(model.inheritance_column)
-      add_ideal_column model.inheritance_column, :type => :string
+    if non_standard_primary_key and sqlite?
+      # make sure this doesn't get deleted later
+      add_ideal_index model.primary_key, :unique => true
     end
 
     # Remove fields from db no longer in schema
@@ -126,11 +121,8 @@ class ActiveRecordInlineSchema::Config
     end
 
     safe_reset_column_information
-  end
 
-  def clear
-    @ideal_columns = ::Set.new
-    @ideal_indexes = ::Set.new
+    release_connection
   end
 
   private
@@ -177,14 +169,28 @@ class ActiveRecordInlineSchema::Config
   end
 
   def connection
-    unless model.connection.active?
-      raise ::RuntimeError, %{[active_record_inline_schema] Must connect to database before running ActiveRecord::Base.auto_upgrade!}
+    @connection || @connection_mutex.synchronize do
+      @connection ||= begin
+        c = ActiveRecord::Base.connection_pool.checkout
+        unless c.active?
+          raise ::RuntimeError, %{[active_record_inline_schema] Must connect to database before calling #{caller.first}}
+        end
+        c
+      end
     end
-    model.connection
+  end
+
+  def release_connection
+    @connection_mutex.synchronize do
+      if @connection
+        ActiveRecord::Base.connection_pool.checkin @connection
+        @connection = nil
+      end
+    end
   end
 
   def database_type
-    if mysql?
+    @database_type ||= if mysql?
       :mysql
     elsif postgresql?
       :postgresql

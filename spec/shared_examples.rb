@@ -42,6 +42,11 @@ describe ActiveRecordInlineSchema do
     end
   end
 
+  it "supports boolean columns" do
+    Pet6.auto_upgrade!
+    Pet6.columns_hash['yesno'].type.must_equal :boolean
+  end
+
   it 'has #key,col,property,attribute inside model' do
     (!!ActiveRecord::Base.connection.table_exists?(Post.table_name)).must_equal false
     (!!ActiveRecord::Base.connection.table_exists?(Category.table_name)).must_equal false
@@ -56,19 +61,6 @@ describe ActiveRecordInlineSchema do
     post.title.must_equal 'foo'
     post.body.must_equal 'bar'
     post.category.must_equal category
-
-
-    # Remove a column
-    Post.inline_schema_config.clear
-    Post.class_eval do
-      col :name
-      col :category_id, :type => :integer
-    end
-    Post.auto_upgrade!
-    post = Post.first
-    post.name.must_be_nil
-    post.category.must_equal category
-    post.wont_respond_to :title
   end
 
   it 'has indexes inside model' do
