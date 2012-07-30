@@ -82,7 +82,7 @@ class ActiveRecordInlineSchema::Config
     existing_columns_hash.reject do |existing_column_name, existing_column|
       existing_column_name.to_s == model.primary_key.to_s
     end.each do |existing_column_name, existing_column|
-      next unless (ideal_column = find_ideal_column existing_column_name)
+      next unless (ideal_column = find_ideal_column(existing_column_name))
 
       option_changes = {}
 
