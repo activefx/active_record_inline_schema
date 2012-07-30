@@ -1,10 +1,6 @@
 require 'set'
 
 class ActiveRecordInlineSchema::Config
-  DEFAULT_CREATE_TABLE_OPTIONS = {
-    :mysql => 'ENGINE=InnoDB'
-  }
-
   attr_reader :model
   attr_reader :ideal_columns
   attr_reader :ideal_indexes
@@ -43,8 +39,6 @@ class ActiveRecordInlineSchema::Config
 
     # Table doesn't exist, create it
     unless connection.table_exists? model.table_name
-      create_table_options ||= DEFAULT_CREATE_TABLE_OPTIONS[database_type]
-
       statements = []
       statements << "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{create_table_options}"
 
