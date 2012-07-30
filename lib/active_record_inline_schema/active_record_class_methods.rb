@@ -21,7 +21,7 @@ module ActiveRecordInlineSchema::ActiveRecordClassMethods
     inline_schema_config.add_ideal_index column_name, options
   end
 
-  def auto_upgrade!(create_table_options = nil)
-    inline_schema_config.apply create_table_options
+  def auto_upgrade!(options = {})
+    inline_schema_config.apply options
   end
 end

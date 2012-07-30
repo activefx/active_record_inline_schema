@@ -19,7 +19,7 @@ class ActiveRecordInlineSchema::Config
     ideal_indexes.add Index.new(self, column_name, options)
   end
 
-  def apply(create_table_options)
+  def apply(options)
     non_standard_primary_key = if (primary_key_column = find_ideal_column(model.primary_key))
       primary_key_column.type != :primary_key
     end
@@ -40,7 +40,7 @@ class ActiveRecordInlineSchema::Config
     # Table doesn't exist, create it
     unless connection.table_exists? model.table_name
       statements = []
-      statements << "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{create_table_options}"
+      statements << "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{options[:create_table]}"
 
       if non_standard_primary_key
         if postgresql?
@@ -63,10 +63,12 @@ class ActiveRecordInlineSchema::Config
     end
 
     # Remove fields from db no longer in schema
-    existing_column_names.reject do |existing_column_name|
-      find_ideal_column existing_column_name
-    end.each do |existing_column_name|
-      connection.remove_column model.table_name, existing_column_name
+    unless options[:gentle]
+      existing_column_names.reject do |existing_column_name|
+        find_ideal_column existing_column_name
+      end.each do |existing_column_name|
+        connection.remove_column model.table_name, existing_column_name
+      end
     end
 
     # Add fields to db new to schema
@@ -77,9 +79,11 @@ class ActiveRecordInlineSchema::Config
     end
 
     # Change attributes of existent columns
-    existing_columns_hash.each do |existing_column_name, existing_column|
-      next if existing_column_name.to_s == model.primary_key.to_s
-      ideal_column = find_ideal_column existing_column_name
+    existing_columns_hash.reject do |existing_column_name, existing_column|
+      existing_column_name.to_s == model.primary_key.to_s
+    end.each do |existing_column_name, existing_column|
+      next unless (ideal_column = find_ideal_column existing_column_name)
+
       option_changes = {}
 
       # First, check if the field type changed
@@ -100,10 +104,12 @@ class ActiveRecordInlineSchema::Config
     end
 
     # Remove old index
-    existing_index_names.reject do |existing_index_name|
-      find_ideal_index existing_index_name
-    end.each do |existing_index_name|
-      connection.remove_index model.table_name, :name => existing_index_name
+    unless options[:gentle]
+      existing_index_names.reject do |existing_index_name|
+        find_ideal_index existing_index_name
+      end.each do |existing_index_name|
+        connection.remove_index model.table_name, :name => existing_index_name
+      end
     end
 
     # Add indexes

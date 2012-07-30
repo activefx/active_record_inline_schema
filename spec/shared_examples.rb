@@ -47,6 +47,43 @@ describe ActiveRecordInlineSchema do
     Pet6.columns_hash['yesno'].type.must_equal :boolean
   end
 
+  it "deletes unrecognized columns by default" do
+    Pet6.auto_upgrade!
+    ActiveRecord::Base.connection.add_column Pet6.table_name, 'foo', :string
+    Pet6.safe_reset_column_information
+    Pet6.column_names.must_include 'foo'
+    Pet6.auto_upgrade!
+    Pet6.column_names.wont_include 'foo'
+  end
+
+  it "deletes unrecognized columns by default" do
+    Pet6.auto_upgrade!
+    ActiveRecord::Base.connection.add_index Pet6.table_name, 'yesno', :name => 'testtest'
+    Pet6.safe_reset_column_information
+    Pet6.db_indexes.must_include 'testtest'
+    Pet6.auto_upgrade!
+    Pet6.db_indexes.wont_include 'testtest'
+  end
+
+  it "doesn't delete unrecognized columns in gentle mode" do
+    Pet6.auto_upgrade!
+    ActiveRecord::Base.connection.add_column Pet6.table_name, 'foo', :string
+    Pet6.safe_reset_column_information
+    Pet6.column_names.must_include 'foo'
+    Pet6.auto_upgrade! :gentle => true
+    Pet6.column_names.must_include 'foo'
+    Pet6.columns_hash['foo'].type.must_equal :string
+  end
+
+  it "doesn't delete unrecognized columns in gentle mode" do
+    Pet6.auto_upgrade!
+    ActiveRecord::Base.connection.add_index Pet6.table_name, 'yesno', :name => 'testtest'
+    Pet6.safe_reset_column_information
+    Pet6.db_indexes.must_include 'testtest'
+    Pet6.auto_upgrade! :gentle => true
+    Pet6.db_indexes.must_include 'testtest'
+  end
+
   it 'has #key,col,property,attribute inside model' do
     (!!ActiveRecord::Base.connection.table_exists?(Post.table_name)).must_equal false
     (!!ActiveRecord::Base.connection.table_exists?(Category.table_name)).must_equal false

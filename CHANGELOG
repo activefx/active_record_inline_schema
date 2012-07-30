@@ -1,3 +1,13 @@
+unreleased
+
+* Breaking changes
+
+  * auto_upgrade!'s first argument is now a generic options hash - if you want to pass create table options, use options[:create_table]
+
+* Enhancements
+
+  * Add "gentle" mode where unrecognized columns and indexes are not dropped. Just pass :gentle => true to auto_upgrade!
+
 0.5.9 / 2012-07-26
 
 * Bug fixes
