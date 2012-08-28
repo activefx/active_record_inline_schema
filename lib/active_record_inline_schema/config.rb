@@ -22,8 +22,10 @@ class ActiveRecordInlineSchema::Config
   def apply(options)
     non_standard_primary_key = if (primary_key_column = find_ideal_column(model.primary_key))
       primary_key_column.type != :primary_key
+    elsif model.primary_key != 'id'
+      true
     end
-
+    
     if non_standard_primary_key
       if postgresql? or sqlite?
         primary_key_column.options[:null] = false

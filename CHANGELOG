@@ -7,6 +7,7 @@ unreleased
 * Enhancements
 
   * Add "gentle" mode where unrecognized columns and indexes are not dropped. Just pass :gentle => true to auto_upgrade!
+  * Better detect when a user specifies a non-standard primary key but doesn't actually specify any columns.
 
 0.5.9 / 2012-07-26
 
