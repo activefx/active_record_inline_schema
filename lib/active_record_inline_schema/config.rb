@@ -27,7 +27,7 @@ class ActiveRecordInlineSchema::Config
     end
     
     if non_standard_primary_key
-      if postgresql? or sqlite?
+      if primary_key_column and (postgresql? or sqlite?)
         primary_key_column.options[:null] = false
       end
     else
