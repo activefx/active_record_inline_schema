@@ -109,6 +109,12 @@ class Pet6 < ActiveRecord::Base
   col :yesno, :type => :boolean
 end
 
+class Pet7 < ActiveRecord::Base
+  include SpecHelper
+  self.primary_key = false
+  col :name
+end
+
 case ENV['DB_ADAPTER']
 when 'mysql'
   class CustomMysql < ActiveRecord::Base

@@ -47,6 +47,13 @@ describe ActiveRecordInlineSchema do
     Pet6.columns_hash['yesno'].type.must_equal :boolean
   end
 
+  it "doesn't force you to have a primary key" do
+    Pet7.auto_upgrade!
+    Pet7.primary_key.must_equal false
+    Pet7.columns_hash['id'].must_equal nil
+    Pet7.columns_hash['name'].type.must_equal :string
+  end
+
   it "deletes unrecognized columns by default" do
     Pet6.auto_upgrade!
     ActiveRecord::Base.connection.add_column Pet6.table_name, 'foo', :string

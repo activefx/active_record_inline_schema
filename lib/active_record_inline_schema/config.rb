@@ -26,18 +26,22 @@ class ActiveRecordInlineSchema::Config
 
   def apply(options)
     dry_run = options.fetch(:dry_run, false)
+    has_primary_key = true
+    non_standard_primary_key = false
 
-    non_standard_primary_key = if (primary_key_column = find_ideal_column(model.primary_key))
-      primary_key_column.type != :primary_key
+    if !model.primary_key
+      has_primary_key = false
+    elsif (primary_key_column = find_ideal_column(model.primary_key))
+      non_standard_primary_key = (primary_key_column.type != :primary_key)
     elsif model.primary_key != 'id'
-      true
+      non_standard_primary_key = true
     end
     
     if non_standard_primary_key
       if primary_key_column and (postgresql? or sqlite?)
         primary_key_column.options[:null] = false
       end
-    else
+    elsif has_primary_key
       add_ideal_column :id, :type => :primary_key
     end
 
