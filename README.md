@@ -40,6 +40,12 @@ Lots and lots of use in the [`earth` library](https://github.com/brighterplanet/
     end
     ApiResponse.auto_upgrade!
 
+    # you can also do this
+    ApiResponse.auto_upgrade! :dry_run => true
+
+    # this won't delete columns that it doesn't know about
+    ApiResponse.auto_upgrade! :gentle => true
+
 ## Credits
 
 Massive thanks to DAddYE, who you follow on twitter [@daddye](http://twitter.com/daddye) and look at his site at [daddye.it](http://www.daddye.it)
@@ -55,7 +61,7 @@ Forked from [`mini_record` version v0.2.1](https://github.com/DAddYE/mini_record
 
 ## Copyright
 
-Copyright 2012 Seamus Abshere
+Copyright 2013 Seamus Abshere
 
 Adapted from [mini_record](https://github.com/DAddYE/mini_record), which is copyright 2011 Davide D'Agostino
 

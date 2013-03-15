@@ -1,4 +1,5 @@
 require 'set'
+require 'logger'
 
 class ActiveRecordInlineSchema::Config
   attr_reader :model
@@ -19,7 +20,13 @@ class ActiveRecordInlineSchema::Config
     ideal_indexes.add Index.new(self, column_name, options)
   end
 
+  def log_dry(msg)
+    (ActiveRecord::Base.logger || (@logger ||= Logger.new($stderr))).info "[ActiveRecordInlineSchema DRY RUN] #{msg}"
+  end
+
   def apply(options)
+    dry_run = options.fetch(:dry_run, false)
+
     non_standard_primary_key = if (primary_key_column = find_ideal_column(model.primary_key))
       primary_key_column.type != :primary_key
     elsif model.primary_key != 'id'
@@ -54,7 +61,11 @@ class ActiveRecordInlineSchema::Config
       end
 
       statements.each do |sql|
-        connection.execute sql
+        if dry_run
+          log_dry sql
+        else
+          connection.execute sql
+        end
       end
       safe_reset_column_information
     end
@@ -69,7 +80,11 @@ class ActiveRecordInlineSchema::Config
       existing_column_names.reject do |existing_column_name|
         find_ideal_column existing_column_name
       end.each do |existing_column_name|
-        connection.remove_column model.table_name, existing_column_name
+        if dry_run
+          log_dry "remove column #{model.table_name}.#{existing_column_name}"
+        else
+          connection.remove_column model.table_name, existing_column_name
+        end
       end
     end
 
@@ -77,7 +92,11 @@ class ActiveRecordInlineSchema::Config
     ideal_columns.reject do |ideal_column|
       find_existing_column ideal_column.name
     end.each do |ideal_column|
-      connection.add_column model.table_name, ideal_column.name, ideal_column.type, ideal_column.options
+      if dry_run
+        log_dry "add column #{model.table_name}.#{ideal_column.name} #{ideal_column.type} #{ideal_column.options.inspect}"
+      else
+        connection.add_column model.table_name, ideal_column.name, ideal_column.type, ideal_column.options
+      end
     end
 
     # Change attributes of existent columns
@@ -101,7 +120,11 @@ class ActiveRecordInlineSchema::Config
 
       # Change the column if applicable
       if type_changed or option_changes.any?
-        connection.change_column model.table_name, existing_column_name, ideal_column.type, option_changes
+        if dry_run
+          log_dry "change column #{model.table_name}.#{existing_column_name} #{ideal_column.type} #{option_changes.inspect}"
+        else
+          connection.change_column model.table_name, existing_column_name, ideal_column.type, option_changes
+        end
       end
     end
 
@@ -110,7 +133,11 @@ class ActiveRecordInlineSchema::Config
       existing_index_names.reject do |existing_index_name|
         find_ideal_index existing_index_name
       end.each do |existing_index_name|
-        connection.remove_index model.table_name, :name => existing_index_name
+        if dry_run
+          log_dry "remove index #{model.table_name} #{existing_index_name}"
+        else
+          connection.remove_index model.table_name, :name => existing_index_name
+        end
       end
     end
 
@@ -118,7 +145,11 @@ class ActiveRecordInlineSchema::Config
     ideal_indexes.reject do |ideal_index|
       find_existing_index ideal_index.name
     end.each do |ideal_index|
-      connection.add_index model.table_name, ideal_index.column_name, ideal_index.options
+      if dry_run
+        log_dry "add index #{model.table_name}.#{ideal_index.column_name} #{ideal_index.options.inspect}"
+      else
+        connection.add_index model.table_name, ideal_index.column_name, ideal_index.options
+      end
     end
 
     safe_reset_column_information
@@ -190,6 +221,6 @@ class ActiveRecordInlineSchema::Config
   end
 
   def postgresql?
-    connection.adapter_name =~ /postgresql/i
+    connection.adapter_name =~ /postgres/i
   end
 end
