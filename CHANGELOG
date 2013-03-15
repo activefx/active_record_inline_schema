@@ -1,3 +1,10 @@
+0.6.1 / 2013-03-15
+
+* Enhancements
+
+  * :dry_run option that just prints info to your log
+  * if AR::Base#primary_key is false-y (e.g. you set Pet.primary_key = false), don't automatically create a primary key column
+
 0.6.0 / 2012-11-29
 
 * Breaking changes

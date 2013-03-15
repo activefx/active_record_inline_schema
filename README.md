@@ -4,6 +4,8 @@ Define table structure (columns and indexes) inside your ActiveRecord models lik
 
 Specify columns like you would with ActiveRecord migrations and then run .auto_upgrade! Based on the mini_record gem from Davide D'Agostino, it adds fewer aliases, doesn't create timestamps and relationship columns automatically.
 
+You don't have to be connected to the database when you run the DSL methods.
+
 ## Production use
 
 Over 2 years in [Brighter Planet's environmental impact API](http://impact.brighterplanet.com) and [reference data service](http://data.brighterplanet.com).
