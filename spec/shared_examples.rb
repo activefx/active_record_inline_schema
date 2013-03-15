@@ -6,12 +6,7 @@ describe ActiveRecordInlineSchema do
   end
 
   describe :regressions do
-    def assert_unique(model, column_name, v)
-      e = if sqlite?
-        ActiveRecord::StatementInvalid
-      else
-        ActiveRecord::RecordNotUnique
-      end
+    def assert_unique(model, column_name, v, e = ActiveRecord::RecordNotUnique)
       lambda do
         2.times do
           p = model.new
@@ -22,8 +17,13 @@ describe ActiveRecordInlineSchema do
     end
 
     it "properly creates tables with only one column, an auto-increment primary key" do
+      e = if sqlite?
+        ActiveRecord::StatementInvalid
+      else
+        ActiveRecord::RecordNotUnique
+      end
       Pet3.auto_upgrade!
-      assert_unique Pet3, :id, 1
+      assert_unique Pet3, :id, 1, e
     end
 
     it "properly creates with only one column, a string primary key" do
