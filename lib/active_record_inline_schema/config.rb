@@ -45,30 +45,39 @@ class ActiveRecordInlineSchema::Config
       add_ideal_column :id, :type => :primary_key
     end
 
-    table_definition = ActiveRecord::ConnectionAdapters::TableDefinition.new connection
+    table_definition = if ActiveRecord::VERSION::MAJOR == 3
+      ActiveRecord::ConnectionAdapters::TableDefinition.new connection
+    else
+      ActiveRecord::ConnectionAdapters::TableDefinition.new model.connection.native_database_types, model.table_name, false, {}
+    end
+    
     ideal_columns.each do |ideal_column|
       ideal_column.inject table_definition
     end
 
     # Table doesn't exist, create it
     unless connection.table_exists? model.table_name
-      statements = []
-      statements << "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{options[:create_table]}"
+      if ActiveRecord::VERSION::MAJOR > 3
+        model.connection.class.const_get(:SchemaCreation).new(model.connection).accept table_definition
+      else
+        statements = []
+        statements << "CREATE TABLE #{model.quoted_table_name} (#{table_definition.to_sql}) #{options[:create_table]}"
 
-      if non_standard_primary_key
-        if postgresql?
-          statements << %{ALTER TABLE #{model.quoted_table_name} ADD PRIMARY KEY (#{model.quoted_primary_key})}
-        elsif mysql?
-          k = model.quoted_primary_key
-          statements.first.sub! /#{k}([^\)]+)\)([^\),]*)/, "#{k}\\1) PRIMARY KEY"
+        if non_standard_primary_key
+          if postgresql?
+            statements << %{ALTER TABLE #{model.quoted_table_name} ADD PRIMARY KEY (#{model.quoted_primary_key})}
+          elsif mysql?
+            k = model.quoted_primary_key
+            statements.first.sub! /#{k}([^\)]+)\)([^\),]*)/, "#{k}\\1) PRIMARY KEY"
+          end
         end
-      end
 
-      statements.each do |sql|
-        if dry_run
-          log_dry sql
-        else
-          connection.execute sql
+        statements.each do |sql|
+          if dry_run
+            log_dry sql
+          else
+            connection.execute sql
+          end
         end
       end
       safe_reset_column_information

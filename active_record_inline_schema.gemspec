@@ -16,10 +16,12 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency 'activesupport'
-  s.add_runtime_dependency "activerecord", ">=3"
+  s.add_runtime_dependency "activerecord", ">=4"
   # s.add_runtime_dependency "activerecord", "~>3.0" # must use mysql2 ~>0.2 to test
   # s.add_runtime_dependency "activerecord", "~>3.1"
   # s.add_runtime_dependency "activerecord", "~>3.2"
+
+  s.add_development_dependency 'pry'
 
   # dev dependencies appear to be in the Gemfile
 end
