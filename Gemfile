@@ -1,10 +1,11 @@
-source :rubygems
+source 'https://rubygems.org'
 
 gemspec
 
 gem 'rake'
 gem 'minitest'
 gem 'minitest-reporters'
+gem 'memoize'
 
 platforms :ruby do
   # if RUBY_VERSION >= '1.9'

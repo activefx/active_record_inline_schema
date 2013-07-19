@@ -15,6 +15,7 @@ module ActiveRecordInlineSchema::ActiveRecordClassMethods
   def col(column_name, options = {})
     inline_schema_config.add_ideal_column column_name, options
   end
+  alias_method :field, :col
 
   # this is not a typo - specify column name, not index name
   def add_index(column_name, options = {})
